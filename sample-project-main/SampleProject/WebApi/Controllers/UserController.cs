@@ -89,7 +89,8 @@ namespace WebApi.Controllers
         [HttpGet]
         public HttpResponseMessage GetUsersByTag(string tag)
         {
-            throw new NotImplementedException();
+            var users = _getUserService.GetUsersByTag(tag);
+            return Found(users);
         }
     }
 }

@@ -60,9 +60,13 @@ namespace BusinessEntities
 
         public void SetEmail(string email)
         {
+            //Initially thought of removing the null check for email.
+            //but since email is considered an identity property and
+            // mostly is required property. I decided to keep it.
+
             if (string.IsNullOrEmpty(email))
             {
-                throw new ArgumentNullException("Name was not provided.");
+                throw new ArgumentNullException("Email was not provided.");
             }
             _email = email;
         }

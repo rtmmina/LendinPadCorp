@@ -23,10 +23,23 @@ namespace Core.Services.Users
 
         public User Create(Guid id, string name, string email, UserTypes type, decimal? annualSalary, IEnumerable<string> tags)
         {
-            var user = _userFactory.Create(id);
-            _updateUserService.Update(user, name, email, type, annualSalary, tags);
-            _userRepository.Save(user);
-            return user;
+            //I would call this method Upsert since it would insert
+            //or update.
+            var userInDb = _userRepository.Get(id);
+            if (userInDb != null)
+            {
+                    _updateUserService.Update(userInDb, name, email, type, annualSalary, tags);
+                    _userRepository.Save(userInDb);
+                return userInDb;
+            }
+            else
+            {
+                var user = _userFactory.Create(id);
+                _updateUserService.Update(user, name, email, type, annualSalary, tags);
+                _userRepository.Save(user);
+                return user;
+            }
+            
         }
     }
 }

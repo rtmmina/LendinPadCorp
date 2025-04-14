@@ -9,6 +9,7 @@ namespace Core.Services.Users
     {
         public void Update(User user, string name, string email, UserTypes type, decimal? annualSalary, IEnumerable<string> tags)
         {
+            annualSalary = annualSalary ?? 0;
             user.SetEmail(email);
             user.SetName(name);
             user.SetType(type);

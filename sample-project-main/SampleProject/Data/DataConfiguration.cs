@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using BusinessEntities;
 using Common;
+using Microsoft.EntityFrameworkCore;
 using Raven.Client;
 using Raven.Client.Document;
 using Raven.Client.Indexes;
@@ -15,9 +16,18 @@ namespace Data
         {
             var assembly = typeof(DataConfiguration).Assembly;
 
+            var options = new DbContextOptionsBuilder<AppDbContext>()
+           .UseInMemoryDatabase("TestDb")
+           .Options;
+
+            container.RegisterSingleton(options);
+            container.Register<AppDbContext>(Lifestyle.Scoped);
+
             container.RegisterSingleton<IListTypeLookup<Assembly>, ListTypeLookup<Assembly>>();
 
             InitializeAssemblyInstancesService.RegisterAssemblyWithSerializableTypes(container, typeof(User).Assembly);
+            InitializeAssemblyInstancesService.RegisterAssemblyWithSerializableTypes(container, typeof(Product).Assembly);
+            InitializeAssemblyInstancesService.RegisterAssemblyWithSerializableTypes(container, typeof(Order).Assembly);
             InitializeAssemblyInstancesService.RegisterAssemblyWithSerializableTypes(container, assembly);
 
             InitializeAssemblyInstancesService.Initialize(container, lifestyle, assembly);
@@ -28,16 +38,16 @@ namespace Data
                                    var session = container.GetInstance<IDocumentStore>().OpenSession();
                                    session.Advanced.MaxNumberOfRequestsPerSession = 5000;
                                    return session;
-                               }, lifestyle);
+                               }, lifestyle);            
         }
 
         private static IDocumentStore InitializeDocumentStore(Assembly assembly, bool createIndexes)
         {
             var documentStore = new DocumentStore
-                                {
-                                    Url = "http://localhost:8080/",
-                                    DefaultDatabase = "SampleProject",
-                                    Conventions =
+            {
+                Url = "http://localhost:8080/",
+                DefaultDatabase = "SampleProject",
+                Conventions =
                                     {
                                         DefaultUseOptimisticConcurrency = true,
                                         DocumentKeyGenerator = (dbname, commands, entity) => "",
@@ -51,7 +61,7 @@ namespace Data
                                                                       serializer.NullValueHandling = NullValueHandling.Include;
                                                                   },
                                     }
-                                };
+            };
 
             documentStore.Initialize();
 
